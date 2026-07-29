@@ -104,9 +104,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/tgalode/vscode-solution-scope.git"
+    "url": "https://github.com/tgalode/vscode-ez-csharp.git"
   },
   "bugs": {
-    "url": "https://github.com/tgalode/vscode-solution-scope/issues"
+    "url": "https://github.com/tgalode/vscode-ez-csharp/issues"
   }
 }
