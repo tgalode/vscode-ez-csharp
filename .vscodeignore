@@ -1,0 +1,15 @@
+.vscode/**
+.github/**
+src/**
+tests/**
+docs/**
+node_modules/**
+out/**
+coverage/**
+esbuild.mjs
+tsconfig.json
+vitest.config.ts
+.gitignore
+**/*.map
+**/*.ts
+!dist/extension.js

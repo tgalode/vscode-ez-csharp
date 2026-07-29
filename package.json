@@ -1,0 +1,112 @@
+{
+  "name": "solution-scope",
+  "displayName": "Solution Scope",
+  "description": "Work on a slice of a large .NET solution. Generate .slnf solution filters, switch between them, and scope the C# language server to the one you need.",
+  "version": "0.1.0",
+  "license": "MIT",
+  "publisher": "tgalode",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Other"
+  ],
+  "keywords": [
+    "dotnet",
+    "csharp",
+    "solution",
+    "slnf",
+    "slnx"
+  ],
+  "extensionDependencies": [],
+  "activationEvents": [
+    "workspaceContains:**/*.sln",
+    "workspaceContains:**/*.slnx",
+    "workspaceContains:**/*.slnf"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "solutionScope.switchScope",
+        "title": "Switch Scope",
+        "category": "Solution Scope"
+      },
+      {
+        "command": "solutionScope.generateFilter",
+        "title": "Generate Solution Filter (.slnf)",
+        "category": "Solution Scope"
+      },
+      {
+        "command": "solutionScope.clearScope",
+        "title": "Clear Scope",
+        "category": "Solution Scope"
+      },
+      {
+        "command": "solutionScope.refresh",
+        "title": "Refresh Discovery",
+        "category": "Solution Scope"
+      },
+      {
+        "command": "solutionScope.showLog",
+        "title": "Show Log",
+        "category": "Solution Scope"
+      }
+    ],
+    "configuration": {
+      "title": "Solution Scope",
+      "properties": {
+        "solutionScope.includeTestProjects": {
+          "type": "boolean",
+          "default": true,
+          "description": "When generating a filter, also include projects that reference the selection and look like test projects."
+        },
+        "solutionScope.restartLanguageServerOnSwitch": {
+          "type": "boolean",
+          "default": true,
+          "description": "Run the C# extension's 'Restart .NET Language Server' command after switching scope."
+        },
+        "solutionScope.statusBar.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the current scope in the status bar."
+        },
+        "solutionScope.exclude": {
+          "type": "string",
+          "default": "**/{node_modules,bin,obj,.git}/**",
+          "description": "Glob pattern excluded when discovering solution and filter files."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "build": "node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "vscode:prepublish": "npm run check && node esbuild.mjs --production",
+    "check": "npm run typecheck && npm run test",
+    "package": "vsce package --no-dependencies"
+  },
+  "dependencies": {
+    "fast-xml-parser": "^5.10.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/vscode": "^1.90.0",
+    "@vscode/vsce": "^3.2.1",
+    "esbuild": "^0.24.0",
+    "ovsx": "^0.10.1",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tgalode/vscode-solution-scope.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tgalode/vscode-solution-scope/issues"
+  }
+}

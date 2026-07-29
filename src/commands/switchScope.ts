@@ -1,0 +1,139 @@
+import * as path from 'node:path';
+import * as vscode from 'vscode';
+import type { Services } from '../services';
+import { readSolution } from '../model/solutionReader';
+import { validateFilter } from '../filters/validation';
+
+interface ScopeItem extends vscode.QuickPickItem {
+  uri?: vscode.Uri;
+  clear?: true;
+}
+
+export async function switchScope(services: Services): Promise<void> {
+  const { discovery, scope, log } = services;
+
+  if (discovery.all.length === 0) {
+    await discovery.refresh();
+  }
+  if (discovery.all.length === 0) {
+    void vscode.window.showInformationMessage(
+      'Solution Scope: no .sln, .slnx or .slnf file found in this workspace.',
+    );
+    return;
+  }
+
+  const current = scope.current()?.toLowerCase();
+
+  const items: ScopeItem[] = [
+    { label: '$(circle-slash) No scope', description: 'Let the C# extension choose', clear: true },
+    { label: 'Solutions', kind: vscode.QuickPickItemKind.Separator },
+    ...discovery.solutions.map((file) => toItem(file.uri, file.label, file.format, current)),
+  ];
+
+  const filters = discovery.all.filter((file) => file.format === 'slnf');
+  if (filters.length > 0) {
+    items.push({ label: 'Filters', kind: vscode.QuickPickItemKind.Separator });
+    items.push(...filters.map((file) => toItem(file.uri, file.label, file.format, current)));
+  }
+
+  const picked = await vscode.window.showQuickPick(items, {
+    title: 'Solution Scope',
+    placeHolder: 'Pick what the C# language server should load',
+    matchOnDescription: true,
+  });
+
+  if (picked === undefined) {
+    return;
+  }
+
+  if (picked.clear === true) {
+    await scope.clear();
+    services.refreshStatusBar();
+    await scope.restartLanguageServer();
+    return;
+  }
+
+  const target = picked.uri;
+  if (target === undefined) {
+    return;
+  }
+
+  if (path.extname(target.fsPath).toLowerCase() === '.slnf' && !(await filterIsUsable(services, target))) {
+    return;
+  }
+
+  await scope.pin(target);
+  services.refreshStatusBar();
+
+  if (!scope.isCSharpExtensionPresent()) {
+    void vscode.window.showWarningMessage(
+      'Scope saved, but the C# extension (ms-dotnettools.csharp) is not installed, so nothing will load it.',
+    );
+    return;
+  }
+
+  const restarted = await scope.restartLanguageServer();
+  if (!restarted) {
+    log.info('Scope pinned without restarting the language server; reload the window to apply it.');
+  }
+}
+
+/**
+ * A filter that names a project its parent solution does not contain fails with
+ * MSB5028 and the language server reports nothing useful, so the problem is surfaced
+ * here, before pinning.
+ */
+async function filterIsUsable(services: Services, filterUri: vscode.Uri): Promise<boolean> {
+  const { files, log } = services;
+
+  const filter = await readSolution(filterUri.fsPath, files);
+  if (filter === undefined) {
+    return true;
+  }
+  log.diagnostics(filterUri.fsPath, filter.diagnostics);
+
+  const solution = await readSolution(filter.solutionPath, files);
+  if (solution === undefined) {
+    void vscode.window.showErrorMessage(
+      `Solution Scope: ${path.basename(filterUri.fsPath)} points at ${filter.solutionPath}, which cannot be read.`,
+    );
+    return false;
+  }
+  log.diagnostics(solution.filePath, solution.diagnostics);
+
+  const problems = await validateFilter(filter, solution, files);
+  const total = problems.missingFromSolution.length + problems.missingOnDisk.length;
+  if (total === 0) {
+    return true;
+  }
+
+  log.diagnostics(`${filterUri.fsPath} (not in the solution)`, problems.missingFromSolution);
+  log.diagnostics(`${filterUri.fsPath} (missing on disk)`, problems.missingOnDisk);
+
+  const choice = await vscode.window.showWarningMessage(
+    `${path.basename(filterUri.fsPath)} has ${total} unusable project reference(s). MSBuild will reject it.`,
+    { modal: false },
+    'Pin anyway',
+    'Show log',
+  );
+
+  if (choice === 'Show log') {
+    log.show();
+    return false;
+  }
+  return choice === 'Pin anyway';
+}
+
+function toItem(
+  uri: vscode.Uri,
+  label: string,
+  format: string,
+  currentLowerCase: string | undefined,
+): ScopeItem {
+  const active = uri.fsPath.toLowerCase() === currentLowerCase;
+  return {
+    label: `${active ? '$(check) ' : ''}${label}`,
+    description: format,
+    uri,
+  };
+}
