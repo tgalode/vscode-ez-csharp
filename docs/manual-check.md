@@ -42,6 +42,9 @@ This is the product's only promise, and no test asserts it.
 - [ ] The overwrite prompt is modal, and dismissing it leaves the existing file untouched.
 - [ ] Turning `solutionScope.statusBar.enabled` off hides the item immediately, without a
       reload.
+- [ ] Open a `.slnf` naming a project the solution does not contain. The entry is
+      underlined, the Problems panel holds one error mentioning `MSB5028`, and fixing the
+      line clears it without saving.
 
 ## Restarting for real
 

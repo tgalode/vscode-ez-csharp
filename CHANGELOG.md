@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.0
+
+- Opening a `.slnf` now reports its problems in the Problems panel, underlined on the
+  entry that causes them. A project the parent solution does not list is an error naming
+  `MSB5028`, the failure MSBuild actually produces; a project whose file is missing from
+  disk is a warning, since the parent solution has the same problem; a declared solution
+  that cannot be read is an error on the path that declares it. Until now this was only
+  visible in the output channel, or as a count in the dialog shown before pinning.
+- The filter is validated as it reads in the editor, unsaved edits included.
+- Parsing a filter goes through `jsonc-parser` so every value keeps the offset it was read
+  from, which is what a diagnostic needs to land on the right line.
+
 ## 0.2.1
 
 Three defects found by running the commands in a real extension host for the first time.

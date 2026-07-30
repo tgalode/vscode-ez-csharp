@@ -35,6 +35,11 @@ against the parent solution and against the disk, and tells you which entries ar
 Left to itself, MSBuild fails with a bare `MSB5028` and the language server reports
 nothing useful.
 
+**Explain it in place.** Open a filter and the same check runs on it: its problems land in
+the Problems panel, underlined on the entry that causes them, rather than in a log you
+have to think of opening. The text in the editor is what gets checked, so a fix clears the
+squiggle before you save.
+
 ## Requirements
 
 The [C# extension](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csharp)

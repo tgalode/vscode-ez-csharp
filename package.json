@@ -2,7 +2,7 @@
   "name": "solution-scope",
   "displayName": "Solution Scope",
   "description": "Work on a slice of a large .NET solution. Generate .slnf solution filters, switch between them, and scope the C# language server to the one you need.",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "license": "MIT",
   "publisher": "tgalode",
   "engines": {
