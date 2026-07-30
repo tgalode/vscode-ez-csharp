@@ -89,6 +89,36 @@ plafond dès que le dépôt est cloné quelques niveaux de dossiers en profondeu
 échoue alors sur un `EINVAL` illisible. Le profil est donc placé dans le dossier
 temporaire, sous un nom court.
 
+## Calibrage sur une solution réelle
+
+Mesuré le 2026-07-30 en pilotant l'extension dans un host de test ouvert sur un dépôt
+d'entreprise, hors du dépôt public conformément au cadrage de la v1. Seuls les chiffres
+sont consignés ici.
+
+| Mesure | Valeur |
+| --- | --- |
+| Solutions découvertes dans le dépôt | 7 |
+| Projets de la solution visée | 81 |
+| Activation et première découverte | 100 ms |
+| Réouverture du sélecteur | instantanée, la liste est en cache |
+| Génération de bout en bout pour une application | 132 ms |
+| Projets retenus dans le filtre | 11, dont 1 de test |
+
+Les 11 projets reproduisent exactement le chiffre que le changelog de la 0.2.0 annonçait
+pour cette application après l'évaluation des conditions MSBuild, ce qui vérifie que la
+mesure alors consignée tient toujours.
+
+Le filtre produit a été rejoué contre le SDK : `dotnet sln <filtre> list` en voit 11 là où
+la solution parente en compte 81, sans `MSB5028`. Le filtre vit à côté de sa solution dans
+un sous-dossier, donc son `solution.path` est un voisin immédiat tandis que ses entrées de
+projets remontent d'un cran : la règle des deux bases distinctes est ainsi vérifiée sur une
+arborescence réelle, et pas seulement sur une fixture.
+
+`dotnet build` sur ce filtre restaure et construit sans se plaindre du filtre lui-même. La
+build s'est arrêtée sur une erreur de compilation préexistante du dépôt hôte, sans rapport
+avec l'extension. La preuve qu'un projet exclu n'est effectivement pas construit reste donc
+celle obtenue en chambre blanche, sur une solution témoin produite par `dotnet new sln`.
+
 ## Ce que ces tests ne couvrent pas
 
 Ils ne prouvent pas que le serveur de langage charge effectivement moins de projets, ni
