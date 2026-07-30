@@ -60,6 +60,12 @@ export class Discovery implements vscode.Disposable {
   }
 }
 
+/**
+ * Two folders of a multi-root workspace can each hold a solution of the same name, and
+ * without the folder in the label the picker shows two indistinguishable entries. A
+ * single-root workspace has nothing to disambiguate, so the folder is left out there.
+ */
 function labelOf(uri: vscode.Uri): string {
-  return vscode.workspace.asRelativePath(uri, false);
+  const multiRoot = (vscode.workspace.workspaceFolders?.length ?? 0) > 1;
+  return vscode.workspace.asRelativePath(uri, multiRoot);
 }
