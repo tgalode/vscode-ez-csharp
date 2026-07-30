@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Contoso.Core\Contoso.Core.csproj" />
+  </ItemGroup>
+
+  <!-- Wired from source only in the Local configuration, consumed as a package otherwise. -->
+  <ItemGroup Condition="'$(Configuration)' == 'Local'">
+    <ProjectReference Include="..\Contoso.Extras\Contoso.Extras.csproj" />
+  </ItemGroup>
+
+</Project>

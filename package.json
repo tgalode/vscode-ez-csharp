@@ -2,7 +2,7 @@
   "name": "solution-scope",
   "displayName": "Solution Scope",
   "description": "Work on a slice of a large .NET solution. Generate .slnf solution filters, switch between them, and scope the C# language server to the one you need.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "license": "MIT",
   "publisher": "tgalode",
   "engines": {
@@ -86,23 +86,32 @@
     }
   },
   "scripts": {
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.integration.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "build": "node esbuild.mjs",
     "watch": "node esbuild.mjs --watch",
     "vscode:prepublish": "npm run check && node esbuild.mjs --production",
     "check": "npm run typecheck && npm run test",
-    "package": "vsce package --no-dependencies"
+    "package": "vsce package --no-dependencies",
+    "build:integration": "tsc -p tsconfig.integration.json",
+    "test:integration": "npm run build && npm run build:integration && vscode-test --label integration",
+    "test:integration:csharp": "npm run build && npm run build:integration && vscode-test --label csharp",
+    "test:integration:multiroot": "npm run build && npm run build:integration && vscode-test --label multi-root",
+    "test:integration:all": "npm run build && npm run build:integration && vscode-test"
   },
   "dependencies": {
     "fast-xml-parser": "^5.10.1"
   },
   "devDependencies": {
+    "@types/mocha": "^10.0.10",
     "@types/node": "^22.10.0",
     "@types/vscode": "^1.90.0",
+    "@vscode/test-cli": "^0.0.15",
+    "@vscode/test-electron": "^3.1.0",
     "@vscode/vsce": "^3.2.1",
     "esbuild": "^0.24.0",
+    "mocha": "^11.7.6",
     "ovsx": "^0.10.1",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"

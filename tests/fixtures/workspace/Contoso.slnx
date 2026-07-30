@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/1 - Libs/" />
+  <Folder Name="/1 - Libs/Core/">
+    <Project Path="src/Contoso.Core/Contoso.Core.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Contoso.App/Contoso.App.csproj" />
+    <Project Path="src/Contoso.Unrelated/Contoso.Unrelated.csproj" />
+  </Folder>
+</Solution>

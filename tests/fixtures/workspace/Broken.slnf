@@ -1,0 +1,9 @@
+{
+  "solution": {
+    "path": "Contoso.sln",
+    "projects": [
+      "src\\Contoso.Core\\Contoso.Core.csproj",
+      "src\\Contoso.Ghost\\Contoso.Ghost.csproj"
+    ]
+  }
+}

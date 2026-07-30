@@ -14,5 +14,6 @@
     "skipLibCheck": true,
     "types": ["node"]
   },
-  "include": ["src", "tests"]
+  "include": ["src", "tests"],
+  "exclude": ["tests/integration", "tests/integration-csharp", "tests/integration-multiroot", "tests/fixtures"]
 }

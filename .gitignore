@@ -4,3 +4,7 @@ out/
 *.vsix
 .DS_Store
 coverage/
+.vscode-test/
+tests/fixtures/workspace/.vscode/
+tests/fixtures/**/bin/
+tests/fixtures/**/obj/
