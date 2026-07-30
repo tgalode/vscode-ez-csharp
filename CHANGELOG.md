@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.2.1
+
+Three defects found by running the commands in a real extension host for the first time.
+
+- Applying a scope no longer fails with `Unable to write to Workspace Settings because
+  dotnet.defaultSolution is not a registered configuration`. That setting belongs to the
+  C# extension, and VS Code refuses to write a setting no installed extension declares,
+  so without it every scope change ended in a settings-layer error. `Switch Scope`,
+  `Clear Scope` and applying a freshly generated filter now say the C# extension is
+  missing, which is both true and actionable.
+- In a multi-root workspace the picker listed solutions by bare file name, so two folders
+  each holding a `Contoso.sln` produced two indistinguishable entries. Labels now carry
+  the folder name when there is more than one root, and stay short when there is one.
+- `Clear Scope` reported success while having changed nothing, for the same registration
+  reason as above.
+
 ## 0.2.0
 
 Fixes a defect that produced polluted filters.

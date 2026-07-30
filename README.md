@@ -75,6 +75,9 @@ against the .NET SDK rather than assumed:
   subdirectory uses `../My.sln` next to `src/A/A.csproj`.
 - MSBuild rejects a filter that names a project the parent solution does not contain. It
   does not skip it. Generated filters are therefore intersected with the solution.
+- A `.slnf` may point at a `.slnx`, even though filters predate that format. `dotnet
+  build` on such a filter builds the projects it names and leaves the rest alone, so
+  filtering a solution migrated to `.slnx` works exactly as before.
 
 Filters are written with backslash separators, matching what Visual Studio and Rider
 produce. The SDK accepts either separator on every platform.
@@ -96,6 +99,19 @@ Dropping a real dependency produces a filter that does not load, so an undecidab
 condition means keep.
 
 Nothing is ever written to your `.sln` or `.slnx` files.
+
+## Developing
+
+```
+npm run check                      # types, then the unit tests on the pure core
+npm run test:integration           # the commands, in a real extension host
+npm run test:integration:csharp    # same, with ms-dotnettools.csharp installed
+npm run test:integration:multiroot # same, on a two-folder workspace
+```
+
+The integration runs drive the real quick picks and input boxes against a synthetic
+solution in `tests/fixtures`. What they cannot judge is covered by
+[`docs/manual-check.md`](docs/manual-check.md).
 
 ## License
 
