@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import type { Services } from '../services';
 import { readSolution } from '../model/solutionReader';
 import { validateFilter } from '../filters/validation';
+import { applyScope } from './applyScope';
 
 interface ScopeItem extends vscode.QuickPickItem {
   uri?: vscode.Uri;
@@ -10,7 +11,7 @@ interface ScopeItem extends vscode.QuickPickItem {
 }
 
 export async function switchScope(services: Services): Promise<void> {
-  const { discovery, scope, log } = services;
+  const { discovery, scope } = services;
 
   if (discovery.all.length === 0) {
     await discovery.refresh();
@@ -47,9 +48,7 @@ export async function switchScope(services: Services): Promise<void> {
   }
 
   if (picked.clear === true) {
-    await scope.clear();
-    services.refreshStatusBar();
-    await scope.restartLanguageServer();
+    await applyScope(services, undefined);
     return;
   }
 
@@ -62,20 +61,7 @@ export async function switchScope(services: Services): Promise<void> {
     return;
   }
 
-  await scope.pin(target);
-  services.refreshStatusBar();
-
-  if (!scope.isCSharpExtensionPresent()) {
-    void vscode.window.showWarningMessage(
-      'Scope saved, but the C# extension (ms-dotnettools.csharp) is not installed, so nothing will load it.',
-    );
-    return;
-  }
-
-  const restarted = await scope.restartLanguageServer();
-  if (!restarted) {
-    log.info('Scope pinned without restarting the language server; reload the window to apply it.');
-  }
+  await applyScope(services, target);
 }
 
 /**

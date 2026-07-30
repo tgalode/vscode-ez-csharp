@@ -8,6 +8,7 @@ import { WorkspaceFileSystem } from './workspace/fileSystem';
 import type { Services } from './services';
 import { switchScope } from './commands/switchScope';
 import { generateFilter } from './commands/generateFilter';
+import { applyScope } from './commands/applyScope';
 
 export function activate(context: vscode.ExtensionContext): void {
   const log = new Log();
@@ -37,11 +38,7 @@ export function activate(context: vscode.ExtensionContext): void {
       run(log, () => generateFilter(services)),
     ),
     vscode.commands.registerCommand('solutionScope.clearScope', () =>
-      run(log, async () => {
-        await scope.clear();
-        services.refreshStatusBar();
-        await scope.restartLanguageServer();
-      }),
+      run(log, () => applyScope(services, undefined)),
     ),
     vscode.commands.registerCommand('solutionScope.refresh', () =>
       run(log, () => discovery.refresh()),
@@ -69,7 +66,7 @@ export function deactivate(): void {
  * A command that throws would surface as an unhandled rejection with no context, so
  * failures are logged and shown once, in terms the user can act on.
  */
-async function run(log: Log, action: () => Promise<void> | void): Promise<void> {
+async function run(log: Log, action: () => Promise<unknown> | unknown): Promise<void> {
   try {
     await action();
   } catch (error) {

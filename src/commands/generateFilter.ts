@@ -7,6 +7,7 @@ import { ProjectGraph } from '../model/projectGraph';
 import { planFilter } from '../filters/planner';
 import { buildFilterContent } from '../filters/generator';
 import { resolveFromDir } from '../model/paths';
+import { applyScope } from './applyScope';
 
 interface ProjectItem extends vscode.QuickPickItem {
   entry: ProjectEntry;
@@ -77,9 +78,7 @@ export async function generateFilter(services: Services): Promise<void> {
   const choice = await vscode.window.showInformationMessage(summary, 'Apply now', 'Open file');
 
   if (choice === 'Apply now') {
-    await services.scope.pin(targetUri);
-    services.refreshStatusBar();
-    await services.scope.restartLanguageServer();
+    await applyScope(services, targetUri);
   } else if (choice === 'Open file') {
     await vscode.window.showTextDocument(targetUri);
   }
