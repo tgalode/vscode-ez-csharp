@@ -15,6 +15,18 @@ function model(format: SolutionModel['format'], relativePaths: string[]): Soluti
   };
 }
 
+/** Same as `model`, with a position on every entry, as the `.slnf` parser produces. */
+function positioned(relativePaths: string[]): SolutionModel {
+  const base = model('slnf', relativePaths);
+  return {
+    ...base,
+    projects: base.projects.map((project, index) => ({
+      ...project,
+      span: { offset: 100 + index * 10, length: 5 },
+    })),
+  };
+}
+
 describe('validateFilter', () => {
   it('accepts a filter whose projects are in the solution and on disk', async () => {
     const files = new StubFiles().project(abs('src', 'Web', 'Web.csproj'));
@@ -25,7 +37,7 @@ describe('validateFilter', () => {
       files,
     );
 
-    expect(problems).toEqual({ missingFromSolution: [], missingOnDisk: [] });
+    expect(problems).toEqual([]);
   });
 
   it('flags a project the solution does not list, which is what MSB5028 reports', async () => {
@@ -37,8 +49,9 @@ describe('validateFilter', () => {
       files,
     );
 
-    expect(problems.missingFromSolution).toEqual([abs('src', 'Ghost', 'Ghost.csproj')]);
-    expect(problems.missingOnDisk).toEqual([]);
+    expect(problems).toEqual([
+      { kind: 'missingFromSolution', absolutePath: abs('src', 'Ghost', 'Ghost.csproj') },
+    ]);
   });
 
   it('flags a project listed by both but absent from disk', async () => {
@@ -48,7 +61,32 @@ describe('validateFilter', () => {
       new StubFiles(),
     );
 
-    expect(problems.missingFromSolution).toEqual([]);
-    expect(problems.missingOnDisk).toEqual([abs('src', 'Web', 'Web.csproj')]);
+    expect(problems).toEqual([
+      { kind: 'missingOnDisk', absolutePath: abs('src', 'Web', 'Web.csproj') },
+    ]);
+  });
+
+  it('carries the position of the entry that caused each problem', async () => {
+    const problems = await validateFilter(
+      positioned(['src/Ghost/Ghost.csproj', 'src/Other/Other.csproj']),
+      model('sln', []),
+      new StubFiles(),
+    );
+
+    expect(problems.map((problem) => problem.span)).toEqual([
+      { offset: 100, length: 5 },
+      { offset: 110, length: 5 },
+    ]);
+  });
+
+  it('works on a model that has no positions at all', async () => {
+    const problems = await validateFilter(
+      model('slnf', ['src/Ghost/Ghost.csproj']),
+      model('sln', []),
+      new StubFiles(),
+    );
+
+    expect(problems).toHaveLength(1);
+    expect(problems[0]!.span).toBeUndefined();
   });
 });

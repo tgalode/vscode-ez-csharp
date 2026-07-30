@@ -2,7 +2,7 @@ import * as path from 'node:path';
 import * as vscode from 'vscode';
 import type { Services } from '../services';
 import { readSolution } from '../model/solutionReader';
-import { validateFilter } from '../filters/validation';
+import { validateFilter, type FilterProblem } from '../filters/validation';
 import { applyScope } from './applyScope';
 
 interface ScopeItem extends vscode.QuickPickItem {
@@ -88,16 +88,18 @@ async function filterIsUsable(services: Services, filterUri: vscode.Uri): Promis
   log.diagnostics(solution.filePath, solution.diagnostics);
 
   const problems = await validateFilter(filter, solution, files);
-  const total = problems.missingFromSolution.length + problems.missingOnDisk.length;
-  if (total === 0) {
+  if (problems.length === 0) {
     return true;
   }
 
-  log.diagnostics(`${filterUri.fsPath} (not in the solution)`, problems.missingFromSolution);
-  log.diagnostics(`${filterUri.fsPath} (missing on disk)`, problems.missingOnDisk);
+  const of = (kind: FilterProblem['kind']): string[] =>
+    problems.filter((problem) => problem.kind === kind).map((problem) => problem.absolutePath);
+
+  log.diagnostics(`${filterUri.fsPath} (not in the solution)`, of('missingFromSolution'));
+  log.diagnostics(`${filterUri.fsPath} (missing on disk)`, of('missingOnDisk'));
 
   const choice = await vscode.window.showWarningMessage(
-    `${path.basename(filterUri.fsPath)} has ${total} unusable project reference(s). MSBuild will reject it.`,
+    `${path.basename(filterUri.fsPath)} has ${problems.length} unusable project reference(s). MSBuild will reject it.`,
     { modal: false },
     'Pin anyway',
     'Show log',

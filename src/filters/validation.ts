@@ -1,11 +1,15 @@
-import type { SolutionModel } from '../model/types';
+import type { SolutionModel, TextSpan } from '../model/types';
 import { absoluteProjectPaths } from '../model/solutionReader';
 
-export interface FilterProblems {
-  /** Listed by the filter but absent from the parent solution. Fails the build with MSB5028. */
-  missingFromSolution: string[];
-  /** Listed by the filter and present in the solution, but no file on disk. */
-  missingOnDisk: string[];
+export interface FilterProblem {
+  /**
+   * `missingFromSolution` fails the build with MSB5028, so the filter does not load at
+   * all. `missingOnDisk` is a working copy problem the parent solution shares.
+   */
+  kind: 'missingFromSolution' | 'missingOnDisk';
+  absolutePath: string;
+  /** Where the offending entry sits in the filter, when its source knows. */
+  span?: TextSpan;
 }
 
 export interface ExistenceProbe {
@@ -21,21 +25,26 @@ export async function validateFilter(
   filter: SolutionModel,
   solution: SolutionModel,
   probe: ExistenceProbe,
-): Promise<FilterProblems> {
+): Promise<FilterProblem[]> {
   const solutionProjects = new Set(absoluteProjectPaths(solution).map((p) => p.toLowerCase()));
+  const problems: FilterProblem[] = [];
 
-  const missingFromSolution: string[] = [];
-  const missingOnDisk: string[] = [];
+  // absoluteProjectPaths maps model.projects in order, so an index addresses both the
+  // resolved path and the entry it came from.
+  const resolved = absoluteProjectPaths(filter);
 
-  for (const project of absoluteProjectPaths(filter)) {
+  for (const [index, project] of resolved.entries()) {
+    const span = filter.projects[index]?.span;
+    const at = span === undefined ? {} : { span };
+
     if (!solutionProjects.has(project.toLowerCase())) {
-      missingFromSolution.push(project);
+      problems.push({ kind: 'missingFromSolution', absolutePath: project, ...at });
       continue;
     }
     if (!(await probe.exists(project))) {
-      missingOnDisk.push(project);
+      problems.push({ kind: 'missingOnDisk', absolutePath: project, ...at });
     }
   }
 
-  return { missingFromSolution, missingOnDisk };
+  return problems;
 }
