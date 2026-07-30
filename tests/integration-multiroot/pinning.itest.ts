@@ -14,14 +14,14 @@ describe('pinning a scope in a multi-root workspace', () => {
 
   before(async () => {
     await vscode.workspace
-      .getConfiguration('solutionScope')
+      .getConfiguration('ezsharp')
       .update('restartLanguageServerOnSwitch', false, vscode.ConfigurationTarget.Workspace);
     await activateExtension();
   });
 
   after(async () => {
     await vscode.workspace
-      .getConfiguration('solutionScope')
+      .getConfiguration('ezsharp')
       .update('restartLanguageServerOnSwitch', undefined, vscode.ConfigurationTarget.Workspace);
   });
 
@@ -38,7 +38,7 @@ describe('pinning a scope in a multi-root workspace', () => {
   it('offers the solutions of every folder, each labelled by its folder', async () => {
     ui = driveUi({ quickPicks: [cancel()] });
 
-    await vscode.commands.executeCommand('solutionScope.switchScope');
+    await vscode.commands.executeCommand('ezsharp.switchScope');
 
     assert.deepEqual(ui.quickPicks[0]?.labels, [
       '$(circle-slash) No scope',
@@ -55,7 +55,7 @@ describe('pinning a scope in a multi-root workspace', () => {
   it('writes an absolute path, the only shape a multi-root workspace honours', async () => {
     ui = driveUi({ quickPicks: [pick('workspace/Contoso.sln')] });
 
-    await vscode.commands.executeCommand('solutionScope.switchScope');
+    await vscode.commands.executeCommand('ezsharp.switchScope');
 
     const written = scopeSetting();
     assert.ok(written !== undefined, 'nothing was written');
@@ -66,8 +66,8 @@ describe('pinning a scope in a multi-root workspace', () => {
   it('marks the pinned solution on the next pass, whichever folder it came from', async () => {
     ui = driveUi({ quickPicks: [pick('secondary/Secondary.sln'), cancel()] });
 
-    await vscode.commands.executeCommand('solutionScope.switchScope');
-    await vscode.commands.executeCommand('solutionScope.switchScope');
+    await vscode.commands.executeCommand('ezsharp.switchScope');
+    await vscode.commands.executeCommand('ezsharp.switchScope');
 
     assert.ok(
       ui.quickPicks[1]?.labels.includes('$(check) secondary/Secondary.sln'),

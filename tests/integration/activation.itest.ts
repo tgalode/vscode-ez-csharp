@@ -4,11 +4,11 @@ import { activateExtension } from './harness';
 import { cancel, driveUi, type Ui } from './ui';
 
 const CONTRIBUTED_COMMANDS = [
-  'solutionScope.switchScope',
-  'solutionScope.generateFilter',
-  'solutionScope.clearScope',
-  'solutionScope.refresh',
-  'solutionScope.showLog',
+  'ezsharp.switchScope',
+  'ezsharp.generateFilter',
+  'ezsharp.clearScope',
+  'ezsharp.refresh',
+  'ezsharp.showLog',
 ];
 
 describe('activation', () => {
@@ -27,7 +27,7 @@ describe('activation', () => {
     let ui: Ui | undefined;
     try {
       ui = driveUi({ quickPicks: [cancel()] });
-      await vscode.commands.executeCommand('solutionScope.switchScope');
+      await vscode.commands.executeCommand('ezsharp.switchScope');
 
       assert.equal(ui.quickPicks.length, 1);
       assert.deepEqual(ui.quickPicks[0]?.labels, [

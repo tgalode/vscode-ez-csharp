@@ -25,9 +25,9 @@ export async function generateFilter(services: Services): Promise<void> {
   }
 
   const plan = await vscode.window.withProgress(
-    { location: vscode.ProgressLocation.Notification, title: 'Solution Scope: resolving references' },
+    { location: vscode.ProgressLocation.Notification, title: 'ezsharp: resolving references' },
     async () => {
-      const settings = vscode.workspace.getConfiguration('solutionScope');
+      const settings = vscode.workspace.getConfiguration('ezsharp');
       const graph = new ProjectGraph(services.files, {
         configuration: settings.get<string>('configuration', 'Debug'),
       });
@@ -94,7 +94,7 @@ async function pickSolution(services: Services): Promise<SolutionModel | undefin
   const candidates = discovery.solutions;
   if (candidates.length === 0) {
     void vscode.window.showInformationMessage(
-      'Solution Scope: no .sln or .slnx file found to build a filter from.',
+      'ezsharp: no .sln or .slnx file found to build a filter from.',
     );
     return undefined;
   }
@@ -103,7 +103,7 @@ async function pickSolution(services: Services): Promise<SolutionModel | undefin
   if (candidates.length > 1) {
     const picked = await vscode.window.showQuickPick(
       candidates.map((file) => ({ label: file.label, description: file.format, file })),
-      { title: 'Solution Scope', placeHolder: 'Which solution should the filter apply to?' },
+      { title: 'ezsharp', placeHolder: 'Which solution should the filter apply to?' },
     );
     if (picked === undefined) {
       return undefined;
@@ -114,7 +114,7 @@ async function pickSolution(services: Services): Promise<SolutionModel | undefin
   const model = await readSolution(chosen.uri.fsPath, files);
   if (model === undefined || model.projects.length === 0) {
     void vscode.window.showErrorMessage(
-      `Solution Scope: no project found in ${chosen.label}. See the log for details.`,
+      `ezsharp: no project found in ${chosen.label}. See the log for details.`,
     );
     if (model !== undefined) {
       log.diagnostics(model.filePath, model.diagnostics);
@@ -137,7 +137,7 @@ async function pickProjects(solution: SolutionModel): Promise<ProjectEntry[] | u
     }));
 
   const picked = await vscode.window.showQuickPick(items, {
-    title: `Solution Scope: ${path.basename(solution.filePath)}`,
+    title: `ezsharp: ${path.basename(solution.filePath)}`,
     placeHolder: 'Pick the projects you want to work on. Their dependencies are added automatically.',
     canPickMany: true,
     matchOnDetail: true,
@@ -154,7 +154,7 @@ async function askForTarget(
   const suggestion = `${selected[0]?.name ?? 'scope'}.slnf`;
 
   const name = await vscode.window.showInputBox({
-    title: 'Solution Scope',
+    title: 'ezsharp',
     prompt: `Filter file name, saved next to ${path.basename(solution.solutionPath)}`,
     value: suggestion,
     validateInput: (value) => {

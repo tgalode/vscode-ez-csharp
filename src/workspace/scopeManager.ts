@@ -76,7 +76,7 @@ export class ScopeManager {
    */
   async restartLanguageServer(): Promise<boolean> {
     const enabled = vscode.workspace
-      .getConfiguration('solutionScope')
+      .getConfiguration('ezsharp')
       .get<boolean>('restartLanguageServerOnSwitch', true);
 
     if (!enabled || !this.isCSharpExtensionPresent()) {

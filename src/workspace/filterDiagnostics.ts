@@ -5,7 +5,7 @@ import { readSolution } from '../model/solutionReader';
 import { validateFilter, type FilterProblem } from '../filters/validation';
 import type { WorkspaceFileSystem } from './fileSystem';
 
-const SOURCE = 'Solution Scope';
+const SOURCE = 'ezsharp';
 const DEBOUNCE_MS = 300;
 
 /**
@@ -17,7 +17,7 @@ const DEBOUNCE_MS = 300;
  * opened. The pre-pin check in switchScope still covers a filter that was never opened.
  */
 export class FilterDiagnostics implements vscode.Disposable {
-  private readonly collection = vscode.languages.createDiagnosticCollection('solutionScope');
+  private readonly collection = vscode.languages.createDiagnosticCollection('ezsharp');
   private readonly pending = new Map<string, ReturnType<typeof setTimeout>>();
   private readonly subscriptions: vscode.Disposable[] = [];
 

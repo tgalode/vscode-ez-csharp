@@ -40,7 +40,7 @@ This is the product's only promise, and no test asserts it.
       as description and the relative path as detail, and filtering by typing part of a
       path works.
 - [ ] The overwrite prompt is modal, and dismissing it leaves the existing file untouched.
-- [ ] Turning `solutionScope.statusBar.enabled` off hides the item immediately, without a
+- [ ] Turning `ezsharp.statusBar.enabled` off hides the item immediately, without a
       reload.
 - [ ] Open a `.slnf` naming a project the solution does not contain. The entry is
       underlined, the Problems panel holds one error mentioning `MSB5028`, and fixing the
@@ -50,7 +50,7 @@ This is the product's only promise, and no test asserts it.
 
 - [ ] Switching scope restarts the language server: the C# output channel shows it
       stopping and starting.
-- [ ] With `solutionScope.restartLanguageServerOnSwitch` set to false, it does not, and
+- [ ] With `ezsharp.restartLanguageServerOnSwitch` set to false, it does not, and
       the log says the scope was applied without a restart.
 
 ## Scale

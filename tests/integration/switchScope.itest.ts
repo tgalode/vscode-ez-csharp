@@ -24,7 +24,7 @@ describe('switch scope, without the C# extension installed', () => {
   it('says the C# extension is missing rather than leaking a settings error', async () => {
     ui = driveUi({ quickPicks: [pick('Contoso.sln')] });
 
-    await vscode.commands.executeCommand('solutionScope.switchScope');
+    await vscode.commands.executeCommand('ezsharp.switchScope');
 
     assert.deepEqual(ui.messagesOfKind('error'), [], 'no raw error should reach the user');
     const warnings = ui.messagesOfKind('warning');
@@ -36,7 +36,7 @@ describe('switch scope, without the C# extension installed', () => {
   it('reports the same on Clear Scope instead of failing', async () => {
     ui = driveUi({});
 
-    await vscode.commands.executeCommand('solutionScope.clearScope');
+    await vscode.commands.executeCommand('ezsharp.clearScope');
 
     assert.deepEqual(ui.messagesOfKind('error'), []);
     assert.equal(ui.messagesOfKind('warning').length, 1);
@@ -45,7 +45,7 @@ describe('switch scope, without the C# extension installed', () => {
   it('does nothing at all when the pick is dismissed', async () => {
     ui = driveUi({ quickPicks: [cancel()] });
 
-    await vscode.commands.executeCommand('solutionScope.switchScope');
+    await vscode.commands.executeCommand('ezsharp.switchScope');
 
     assert.deepEqual(ui.messages, []);
     assert.equal(scopeSetting(), undefined);
@@ -57,7 +57,7 @@ describe('switch scope, without the C# extension installed', () => {
       answerMessage: () => 'Show log',
     });
 
-    await vscode.commands.executeCommand('solutionScope.switchScope');
+    await vscode.commands.executeCommand('ezsharp.switchScope');
 
     const warnings = ui.messagesOfKind('warning');
     assert.equal(warnings.length, 1, 'the unusable filter is reported before anything is pinned');
@@ -72,7 +72,7 @@ describe('switch scope, without the C# extension installed', () => {
       answerMessage: (message) => (message.actions.includes('Pin anyway') ? 'Pin anyway' : undefined),
     });
 
-    await vscode.commands.executeCommand('solutionScope.switchScope');
+    await vscode.commands.executeCommand('ezsharp.switchScope');
 
     assert.deepEqual(ui.messagesOfKind('error'), []);
     const warnings = ui.messagesOfKind('warning');
@@ -83,7 +83,7 @@ describe('switch scope, without the C# extension installed', () => {
   it('accepts a filter that matches its solution', async () => {
     ui = driveUi({ quickPicks: [pick('Contoso.Core.slnf')] });
 
-    await vscode.commands.executeCommand('solutionScope.switchScope');
+    await vscode.commands.executeCommand('ezsharp.switchScope');
 
     assert.deepEqual(ui.messagesOfKind('error'), []);
     const warnings = ui.messagesOfKind('warning');

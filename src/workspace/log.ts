@@ -8,7 +8,7 @@ export class Log implements vscode.Disposable {
   private readonly channel: vscode.OutputChannel;
 
   constructor() {
-    this.channel = vscode.window.createOutputChannel('Solution Scope');
+    this.channel = vscode.window.createOutputChannel('ezsharp');
   }
 
   info(message: string): void {

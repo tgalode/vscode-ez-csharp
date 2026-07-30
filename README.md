@@ -1,8 +1,8 @@
-# Solution Scope
+# ezsharp
 
 Work on a slice of a large .NET solution instead of loading all of it.
 
-Solution Scope generates `.slnf` solution filters, switches between them, and points the
+ezsharp generates `.slnf` solution filters, switches between them, and points the
 C# language server at the one you picked. On a solution with dozens of projects, that is
 the difference between an editor that responds and one that spends minutes indexing code
 you are not touching.
@@ -23,14 +23,14 @@ which already does that well.
 ## What it does
 
 **Switch scope.** A status bar item shows what the language server is loading. Click it to
-pick any solution or filter found in the workspace. Solution Scope writes
+pick any solution or filter found in the workspace. ezsharp writes
 `dotnet.defaultSolution` and restarts the language server.
 
 **Generate a filter.** Pick a solution, then pick the projects you care about. Solution
 Scope walks their `ProjectReference` graph, adds every dependency they need, optionally
 adds the test projects that cover them, and writes the `.slnf` next to the solution.
 
-**Explain a broken filter.** Before pinning a filter, Solution Scope checks each project
+**Explain a broken filter.** Before pinning a filter, ezsharp checks each project
 against the parent solution and against the disk, and tells you which entries are wrong.
 Left to itself, MSBuild fails with a bare `MSB5028` and the language server reports
 nothing useful.
@@ -51,21 +51,21 @@ a language server to apply it to.
 
 | Command | What it does |
 | --- | --- |
-| `Solution Scope: Switch Scope` | Pick the solution or filter to load |
-| `Solution Scope: Generate Solution Filter (.slnf)` | Build a filter from a project selection |
-| `Solution Scope: Clear Scope` | Unpin, letting the C# extension choose again |
-| `Solution Scope: Refresh Discovery` | Re-scan the workspace |
-| `Solution Scope: Show Log` | Open the output channel with parse diagnostics |
+| `ezsharp: Switch Scope` | Pick the solution or filter to load |
+| `ezsharp: Generate Filter (.slnf)` | Build a filter from a project selection |
+| `ezsharp: Clear Scope` | Unpin, letting the C# extension choose again |
+| `ezsharp: Refresh Discovery` | Re-scan the workspace |
+| `ezsharp: Show Log` | Open the output channel with parse diagnostics |
 
 ## Settings
 
 | Setting | Default | Meaning |
 | --- | --- | --- |
-| `solutionScope.configuration` | `Debug` | MSBuild configuration used to resolve conditional references |
-| `solutionScope.includeTestProjects` | `true` | Add test projects that reference the selection |
-| `solutionScope.restartLanguageServerOnSwitch` | `true` | Restart the C# server after switching |
-| `solutionScope.statusBar.enabled` | `true` | Show the current scope in the status bar |
-| `solutionScope.exclude` | `**/{node_modules,bin,obj,.git}/**` | Paths ignored when discovering files |
+| `ezsharp.configuration` | `Debug` | MSBuild configuration used to resolve conditional references |
+| `ezsharp.includeTestProjects` | `true` | Add test projects that reference the selection |
+| `ezsharp.restartLanguageServerOnSwitch` | `true` | Restart the C# server after switching |
+| `ezsharp.statusBar.enabled` | `true` | Show the current scope in the status bar |
+| `ezsharp.exclude` | `**/{node_modules,bin,obj,.git}/**` | Paths ignored when discovering files |
 
 ## Notes on the formats
 
@@ -90,7 +90,7 @@ produce. The SDK accepts either separator on every platform.
 ## Conditional references
 
 A `ProjectReference` guarded by an MSBuild `Condition` is only followed when the
-condition holds for `solutionScope.configuration`. This matters for repositories that
+condition holds for `ezsharp.configuration`. This matters for repositories that
 wire neighbouring source repositories under a dedicated configuration and consume them
 as NuGet packages otherwise: following those references unconditionally pulls projects
 into every filter that do not apply, and are often not even cloned.

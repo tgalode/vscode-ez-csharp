@@ -31,7 +31,7 @@ export class Discovery implements vscode.Disposable {
 
   async refresh(): Promise<void> {
     const exclude = vscode.workspace
-      .getConfiguration('solutionScope')
+      .getConfiguration('ezsharp')
       .get<string>('exclude', '**/{node_modules,bin,obj,.git}/**');
 
     const found = await vscode.workspace.findFiles(GLOB, exclude === '' ? null : exclude);

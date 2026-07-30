@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.4.0
+
+Renamed to `ezsharp`, before the first publication rather than after, since an extension
+identifier is fixed for good once published and setting keys cannot move without breaking
+every configuration that uses them.
+
+- The extension identifier is now `tgalode.ezsharp`. Anyone who installed an earlier
+  `.vsix` by hand should uninstall `tgalode.solution-scope`: the two identifiers are
+  different extensions and would both load, each with its own status bar item.
+- Commands are grouped under `ezsharp` in the command palette, so typing `ez` narrows it
+  to this extension and nothing else.
+- Settings moved from `solutionScope.*` to `ezsharp.*`.
+- `Generate Solution Filter (.slnf)` is now `Generate Filter (.slnf)`, since `Solution`
+  said nothing that `.slnf` did not.
+
 ## 0.3.0
 
 - Opening a `.slnf` now reports its problems in the Problems panel, underlined on the
@@ -38,7 +53,7 @@ Fixes a defect that produced polluted filters.
   packages otherwise, no longer sees those projects pulled into every filter. Measured
   on a real solution, the closure of one application went from 24 projects to 11 in
   `Debug`, and still resolves to 24 under the configuration that does wire them.
-- New `solutionScope.configuration` setting, `Debug` by default, selects the
+- New `ezsharp.configuration` setting, `Debug` by default, selects the
   configuration the graph is resolved for.
 - A condition outside the supported subset, a property function or a boolean operator,
   keeps the reference and reports it in the log. Dropping a real dependency yields a

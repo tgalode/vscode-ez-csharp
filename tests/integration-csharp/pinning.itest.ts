@@ -17,14 +17,14 @@ describe('pinning a scope, with the C# extension installed', () => {
 
   before(async () => {
     await vscode.workspace
-      .getConfiguration('solutionScope')
+      .getConfiguration('ezsharp')
       .update('restartLanguageServerOnSwitch', false, vscode.ConfigurationTarget.Workspace);
     await activateExtension();
   });
 
   after(async () => {
     await vscode.workspace
-      .getConfiguration('solutionScope')
+      .getConfiguration('ezsharp')
       .update('restartLanguageServerOnSwitch', undefined, vscode.ConfigurationTarget.Workspace);
   });
 
@@ -61,7 +61,7 @@ describe('pinning a scope, with the C# extension installed', () => {
   it('writes a solution as a path relative to the single workspace folder', async () => {
     ui = driveUi({ quickPicks: [pick('Contoso.sln')] });
 
-    await vscode.commands.executeCommand('solutionScope.switchScope');
+    await vscode.commands.executeCommand('ezsharp.switchScope');
 
     assert.deepEqual(ui.messages, [], 'a scope that applies says nothing');
     assert.equal(scopeSetting(), 'Contoso.sln');
@@ -70,7 +70,7 @@ describe('pinning a scope, with the C# extension installed', () => {
   it('writes a filter the same way', async () => {
     ui = driveUi({ quickPicks: [pick('Contoso.Core.slnf')] });
 
-    await vscode.commands.executeCommand('solutionScope.switchScope');
+    await vscode.commands.executeCommand('ezsharp.switchScope');
 
     assert.deepEqual(ui.messages, []);
     assert.equal(scopeSetting(), 'Contoso.Core.slnf');
@@ -79,8 +79,8 @@ describe('pinning a scope, with the C# extension installed', () => {
   it('marks the pinned scope in the picker, which proves the value round-trips', async () => {
     ui = driveUi({ quickPicks: [pick('Contoso.sln'), cancel()] });
 
-    await vscode.commands.executeCommand('solutionScope.switchScope');
-    await vscode.commands.executeCommand('solutionScope.switchScope');
+    await vscode.commands.executeCommand('ezsharp.switchScope');
+    await vscode.commands.executeCommand('ezsharp.switchScope');
 
     assert.deepEqual(ui.quickPicks[1]?.labels, [
       '$(circle-slash) No scope',
@@ -96,20 +96,20 @@ describe('pinning a scope, with the C# extension installed', () => {
   it('clears the setting rather than leaving an empty value behind', async () => {
     ui = driveUi({ quickPicks: [pick('Contoso.sln'), pick('No scope')] });
 
-    await vscode.commands.executeCommand('solutionScope.switchScope');
+    await vscode.commands.executeCommand('ezsharp.switchScope');
     assert.equal(scopeSetting(), 'Contoso.sln');
 
-    await vscode.commands.executeCommand('solutionScope.switchScope');
+    await vscode.commands.executeCommand('ezsharp.switchScope');
     assert.equal(scopeSetting(), undefined);
   });
 
   it('clears the setting through Clear Scope too', async () => {
     ui = driveUi({ quickPicks: [pick('Contoso.sln')] });
 
-    await vscode.commands.executeCommand('solutionScope.switchScope');
+    await vscode.commands.executeCommand('ezsharp.switchScope');
     assert.equal(scopeSetting(), 'Contoso.sln');
 
-    await vscode.commands.executeCommand('solutionScope.clearScope');
+    await vscode.commands.executeCommand('ezsharp.clearScope');
     assert.equal(scopeSetting(), undefined);
     assert.deepEqual(ui.messages, []);
   });

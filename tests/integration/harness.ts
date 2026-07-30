@@ -1,7 +1,7 @@
 import * as path from 'node:path';
 import * as vscode from 'vscode';
 
-export const EXTENSION_ID = 'tgalode.solution-scope';
+export const EXTENSION_ID = 'tgalode.ezsharp';
 
 /** Activates the extension under development and waits for its first discovery pass. */
 export async function activateExtension(): Promise<void> {
@@ -11,7 +11,7 @@ export async function activateExtension(): Promise<void> {
   }
   await extension.activate();
   // activate() kicks discovery off without awaiting it; the commands need its result.
-  await vscode.commands.executeCommand('solutionScope.refresh');
+  await vscode.commands.executeCommand('ezsharp.refresh');
 }
 
 export function workspaceRoot(): string {

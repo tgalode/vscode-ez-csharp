@@ -36,21 +36,21 @@ export function activate(context: vscode.ExtensionContext): void {
     discovery,
     statusBar,
     filterDiagnostics,
-    vscode.commands.registerCommand('solutionScope.switchScope', () => run(log, () => switchScope(services))),
-    vscode.commands.registerCommand('solutionScope.generateFilter', () =>
+    vscode.commands.registerCommand('ezsharp.switchScope', () => run(log, () => switchScope(services))),
+    vscode.commands.registerCommand('ezsharp.generateFilter', () =>
       run(log, () => generateFilter(services)),
     ),
-    vscode.commands.registerCommand('solutionScope.clearScope', () =>
+    vscode.commands.registerCommand('ezsharp.clearScope', () =>
       run(log, () => applyScope(services, undefined)),
     ),
-    vscode.commands.registerCommand('solutionScope.refresh', () =>
+    vscode.commands.registerCommand('ezsharp.refresh', () =>
       run(log, () => discovery.refresh()),
     ),
-    vscode.commands.registerCommand('solutionScope.showLog', () => log.show()),
+    vscode.commands.registerCommand('ezsharp.showLog', () => log.show()),
     vscode.workspace.onDidChangeConfiguration((event) => {
       if (
         event.affectsConfiguration('dotnet.defaultSolution') ||
-        event.affectsConfiguration('solutionScope.statusBar.enabled')
+        event.affectsConfiguration('ezsharp.statusBar.enabled')
       ) {
         services.refreshStatusBar();
       }
@@ -75,6 +75,6 @@ async function run(log: Log, action: () => Promise<unknown> | unknown): Promise<
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     log.info(`Command failed: ${message}`);
-    void vscode.window.showErrorMessage(`Solution Scope: ${message}`);
+    void vscode.window.showErrorMessage(`ezsharp: ${message}`);
   }
 }

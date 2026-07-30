@@ -8,15 +8,15 @@ export class ScopeStatusBar implements vscode.Disposable {
   private readonly item: vscode.StatusBarItem;
 
   constructor() {
-    this.item = vscode.window.createStatusBarItem('solutionScope.scope', vscode.StatusBarAlignment.Left, 90);
-    this.item.name = 'Solution Scope';
-    this.item.command = 'solutionScope.switchScope';
+    this.item = vscode.window.createStatusBarItem('ezsharp.scope', vscode.StatusBarAlignment.Left, 90);
+    this.item.name = 'ezsharp';
+    this.item.command = 'ezsharp.switchScope';
   }
 
   /** `label` is undefined when no scope is pinned. */
   render(label: string | undefined): void {
     const enabled = vscode.workspace
-      .getConfiguration('solutionScope')
+      .getConfiguration('ezsharp')
       .get<boolean>('statusBar.enabled', true);
 
     if (!enabled) {

@@ -35,12 +35,12 @@ function report(services: Services, failure: ScopeFailure): void {
   if (failure.reason === 'csharpExtensionMissing') {
     services.log.info('Scope not applied: ms-dotnettools.csharp is not installed.');
     void vscode.window.showWarningMessage(
-      'Solution Scope: the C# extension (ms-dotnettools.csharp) is not installed, so there is no ' +
+      'ezsharp: the C# extension (ms-dotnettools.csharp) is not installed, so there is no ' +
         'language server to scope. Install it, then pick a scope again.',
     );
     return;
   }
 
   services.log.info(`Scope not applied: ${failure.message}`);
-  void vscode.window.showWarningMessage(`Solution Scope: the scope could not be saved. ${failure.message}`);
+  void vscode.window.showWarningMessage(`ezsharp: the scope could not be saved. ${failure.message}`);
 }

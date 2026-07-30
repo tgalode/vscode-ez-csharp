@@ -18,7 +18,7 @@ export async function switchScope(services: Services): Promise<void> {
   }
   if (discovery.all.length === 0) {
     void vscode.window.showInformationMessage(
-      'Solution Scope: no .sln, .slnx or .slnf file found in this workspace.',
+      'ezsharp: no .sln, .slnx or .slnf file found in this workspace.',
     );
     return;
   }
@@ -38,7 +38,7 @@ export async function switchScope(services: Services): Promise<void> {
   }
 
   const picked = await vscode.window.showQuickPick(items, {
-    title: 'Solution Scope',
+    title: 'ezsharp',
     placeHolder: 'Pick what the C# language server should load',
     matchOnDescription: true,
   });
@@ -81,7 +81,7 @@ async function filterIsUsable(services: Services, filterUri: vscode.Uri): Promis
   const solution = await readSolution(filter.solutionPath, files);
   if (solution === undefined) {
     void vscode.window.showErrorMessage(
-      `Solution Scope: ${path.basename(filterUri.fsPath)} points at ${filter.solutionPath}, which cannot be read.`,
+      `ezsharp: ${path.basename(filterUri.fsPath)} points at ${filter.solutionPath}, which cannot be read.`,
     );
     return false;
   }

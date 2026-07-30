@@ -38,7 +38,7 @@ describe('filter diagnostics', () => {
     for (const name of GENERATED) {
       await deleteIfPresent(inWorkspace(name));
     }
-    await vscode.commands.executeCommand('solutionScope.refresh');
+    await vscode.commands.executeCommand('ezsharp.refresh');
   });
 
   it('underlines the entry a filter names outside its solution', async () => {
@@ -49,7 +49,7 @@ describe('filter diagnostics', () => {
     const [diagnostic] = await waitFor(uri, (all) => all.length === 1, 'one diagnostic');
 
     assert.equal(diagnostic!.severity, vscode.DiagnosticSeverity.Error);
-    assert.equal(diagnostic!.source, 'Solution Scope');
+    assert.equal(diagnostic!.source, 'ezsharp');
     assert.equal(diagnostic!.code, 'missingFromSolution');
     assert.match(diagnostic!.message, /MSB5028/);
     assert.equal(

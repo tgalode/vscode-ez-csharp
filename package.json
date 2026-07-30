@@ -1,8 +1,8 @@
 {
-  "name": "solution-scope",
-  "displayName": "Solution Scope",
+  "name": "ezsharp",
+  "displayName": "ezsharp",
   "description": "Work on a slice of a large .NET solution. Generate .slnf solution filters, switch between them, and scope the C# language server to the one you need.",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "license": "MIT",
   "publisher": "tgalode",
   "engines": {
@@ -29,55 +29,55 @@
   "contributes": {
     "commands": [
       {
-        "command": "solutionScope.switchScope",
+        "command": "ezsharp.switchScope",
         "title": "Switch Scope",
-        "category": "Solution Scope"
+        "category": "ezsharp"
       },
       {
-        "command": "solutionScope.generateFilter",
-        "title": "Generate Solution Filter (.slnf)",
-        "category": "Solution Scope"
+        "command": "ezsharp.generateFilter",
+        "title": "Generate Filter (.slnf)",
+        "category": "ezsharp"
       },
       {
-        "command": "solutionScope.clearScope",
+        "command": "ezsharp.clearScope",
         "title": "Clear Scope",
-        "category": "Solution Scope"
+        "category": "ezsharp"
       },
       {
-        "command": "solutionScope.refresh",
+        "command": "ezsharp.refresh",
         "title": "Refresh Discovery",
-        "category": "Solution Scope"
+        "category": "ezsharp"
       },
       {
-        "command": "solutionScope.showLog",
+        "command": "ezsharp.showLog",
         "title": "Show Log",
-        "category": "Solution Scope"
+        "category": "ezsharp"
       }
     ],
     "configuration": {
-      "title": "Solution Scope",
+      "title": "ezsharp",
       "properties": {
-        "solutionScope.configuration": {
+        "ezsharp.configuration": {
           "type": "string",
           "default": "Debug",
           "description": "MSBuild configuration used to resolve conditional ProjectReference entries. Set this when your projects wire dependencies differently per configuration."
         },
-        "solutionScope.includeTestProjects": {
+        "ezsharp.includeTestProjects": {
           "type": "boolean",
           "default": true,
           "description": "When generating a filter, also include projects that reference the selection and look like test projects."
         },
-        "solutionScope.restartLanguageServerOnSwitch": {
+        "ezsharp.restartLanguageServerOnSwitch": {
           "type": "boolean",
           "default": true,
           "description": "Run the C# extension's 'Restart .NET Language Server' command after switching scope."
         },
-        "solutionScope.statusBar.enabled": {
+        "ezsharp.statusBar.enabled": {
           "type": "boolean",
           "default": true,
           "description": "Show the current scope in the status bar."
         },
-        "solutionScope.exclude": {
+        "ezsharp.exclude": {
           "type": "string",
           "default": "**/{node_modules,bin,obj,.git}/**",
           "description": "Glob pattern excluded when discovering solution and filter files."

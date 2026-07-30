@@ -32,13 +32,13 @@ describe('generate filter', () => {
     }
     await setConfiguration(undefined);
     await setIncludeTestProjects(undefined);
-    await vscode.commands.executeCommand('solutionScope.refresh');
+    await vscode.commands.executeCommand('ezsharp.refresh');
   });
 
   it('asks which solution to filter when the workspace holds more than one', async () => {
     ui = driveUi({ quickPicks: [cancel()] });
 
-    await vscode.commands.executeCommand('solutionScope.generateFilter');
+    await vscode.commands.executeCommand('ezsharp.generateFilter');
 
     assert.equal(ui.quickPicks.length, 1, 'the flow stops on a dismissed solution pick');
     assert.deepEqual(ui.quickPicks[0]?.labels, ['Contoso.sln', 'Contoso.slnx']);
@@ -52,7 +52,7 @@ describe('generate filter', () => {
       answerMessage: () => undefined,
     });
 
-    await vscode.commands.executeCommand('solutionScope.generateFilter');
+    await vscode.commands.executeCommand('ezsharp.generateFilter');
     ui.assertFullyConsumed();
 
     const document = await readFilter('Contoso.App.slnf');
@@ -78,7 +78,7 @@ describe('generate filter', () => {
       inputs: [undefined],
     });
 
-    await vscode.commands.executeCommand('solutionScope.generateFilter');
+    await vscode.commands.executeCommand('ezsharp.generateFilter');
 
     assert.equal(ui.inputBoxes.length, 1);
     assert.equal(ui.inputBoxes[0]?.value, 'Contoso.App.slnf');
@@ -94,7 +94,7 @@ describe('generate filter', () => {
       answerMessage: () => undefined,
     });
 
-    await vscode.commands.executeCommand('solutionScope.generateFilter');
+    await vscode.commands.executeCommand('ezsharp.generateFilter');
 
     const document = await readFilter('Local.slnf');
     assert.deepEqual(document.solution.projects, [
@@ -114,7 +114,7 @@ describe('generate filter', () => {
       answerMessage: () => undefined,
     });
 
-    await vscode.commands.executeCommand('solutionScope.generateFilter');
+    await vscode.commands.executeCommand('ezsharp.generateFilter');
 
     const document = await readFilter('NoTests.slnf');
     assert.deepEqual(document.solution.projects, [
@@ -135,7 +135,7 @@ describe('generate filter', () => {
       answerMessage: () => undefined,
     });
 
-    await vscode.commands.executeCommand('solutionScope.generateFilter');
+    await vscode.commands.executeCommand('ezsharp.generateFilter');
 
     const document = await readFilter('FromSlnx.slnf');
     assert.equal(document.solution.path, 'Contoso.slnx');
@@ -152,7 +152,7 @@ describe('generate filter', () => {
   it('shows which solution folder a project sits in, nested folders included', async () => {
     ui = driveUi({ quickPicks: [pick('Contoso.slnx'), cancel()] });
 
-    await vscode.commands.executeCommand('solutionScope.generateFilter');
+    await vscode.commands.executeCommand('ezsharp.generateFilter');
 
     assert.deepEqual(ui.quickPicks[1]?.labels, [
       'Contoso.App',
@@ -174,7 +174,7 @@ describe('generate filter', () => {
       answerMessage: () => undefined,
     });
 
-    await vscode.commands.executeCommand('solutionScope.generateFilter');
+    await vscode.commands.executeCommand('ezsharp.generateFilter');
 
     const warnings = ui.messagesOfKind('warning');
     assert.equal(warnings.length, 1);
@@ -189,7 +189,7 @@ describe('generate filter', () => {
       answerMessage: (message) => (message.actions.includes('Apply now') ? 'Apply now' : undefined),
     });
 
-    await vscode.commands.executeCommand('solutionScope.generateFilter');
+    await vscode.commands.executeCommand('ezsharp.generateFilter');
 
     assert.deepEqual(ui.messagesOfKind('error'), [], 'no raw settings error should surface');
     assert.equal(ui.messagesOfKind('warning').length, 1);
@@ -204,12 +204,12 @@ async function readFilter(name: string): Promise<FilterDocument> {
 
 async function setConfiguration(value: string | undefined): Promise<void> {
   await vscode.workspace
-    .getConfiguration('solutionScope')
+    .getConfiguration('ezsharp')
     .update('configuration', value, vscode.ConfigurationTarget.Workspace);
 }
 
 async function setIncludeTestProjects(value: boolean | undefined): Promise<void> {
   await vscode.workspace
-    .getConfiguration('solutionScope')
+    .getConfiguration('ezsharp')
     .update('includeTestProjects', value, vscode.ConfigurationTarget.Workspace);
 }
