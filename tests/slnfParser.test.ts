@@ -8,7 +8,10 @@ describe('parseSlnf', () => {
     );
 
     expect(result.solutionRelativePath).toBe('../My.sln');
-    expect(result.projects).toEqual([{ name: 'A', relativePath: 'src/A/A.csproj' }]);
+    // Positions are asserted on their own below; this test is about normalization.
+    expect(result.projects.map(({ name, relativePath }) => ({ name, relativePath }))).toEqual([
+      { name: 'A', relativePath: 'src/A/A.csproj' },
+    ]);
     expect(result.diagnostics).toEqual([]);
   });
 
@@ -44,5 +47,49 @@ describe('parseSlnf', () => {
 
     expect(result.projects.map((project) => project.name)).toEqual(['a']);
     expect(result.diagnostics).toHaveLength(2);
+  });
+
+  it('records where each project entry sits in the source', () => {
+    const content = '{"solution":{"path":"My.sln","projects":["a.csproj","b.csproj"]}}';
+
+    const result = parseSlnf(content);
+
+    const first = result.projects[0]!.span!;
+    expect(content.slice(first.offset, first.offset + first.length)).toBe('"a.csproj"');
+
+    const second = result.projects[1]!.span!;
+    expect(content.slice(second.offset, second.offset + second.length)).toBe('"b.csproj"');
+  });
+
+  it('records where the declared solution path sits', () => {
+    const content = '{"solution":{"path":"..\\\\My.sln","projects":[]}}';
+
+    const span = parseSlnf(content).solutionPathSpan!;
+
+    expect(content.slice(span.offset, span.offset + span.length)).toBe('"..\\\\My.sln"');
+  });
+
+  it('keeps positions right when the file is indented over several lines', () => {
+    const content = [
+      '{',
+      '  "solution": {',
+      '    "path": "My.sln",',
+      '    "projects": [',
+      '      "src/A/A.csproj"',
+      '    ]',
+      '  }',
+      '}',
+    ].join('\n');
+
+    const span = parseSlnf(content).projects[0]!.span!;
+
+    expect(content.slice(span.offset, span.offset + span.length)).toBe('"src/A/A.csproj"');
+  });
+
+  it('gives no position for an entry it skipped', () => {
+    const result = parseSlnf('{"solution":{"path":"My.sln","projects":[42,"a.csproj"]}}');
+
+    expect(result.projects).toHaveLength(1);
+    expect(result.projects[0]!.name).toBe('a');
   });
 });

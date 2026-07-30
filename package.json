@@ -101,7 +101,8 @@
     "test:integration:all": "npm run build && npm run build:integration && vscode-test"
   },
   "dependencies": {
-    "fast-xml-parser": "^5.10.1"
+    "fast-xml-parser": "^5.10.1",
+    "jsonc-parser": "^3.3.1"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",

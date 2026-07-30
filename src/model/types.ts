@@ -1,5 +1,12 @@
 export type SolutionFormat = 'sln' | 'slnx' | 'slnf';
 
+/** Where something sits in the source text of the file it was read from. */
+export interface TextSpan {
+  /** Character offset from the start of the file. */
+  offset: number;
+  length: number;
+}
+
 export interface ProjectEntry {
   /** Display name, as written in the solution or derived from the file name. */
   name: string;
@@ -7,6 +14,11 @@ export interface ProjectEntry {
   relativePath: string;
   /** Solution folder path with forward slashes, e.g. `3 - Web/Legacy`. Absent at the root. */
   folder?: string;
+  /**
+   * Where the entry sits in its source file, quotes included. Set by the `.slnf` parser
+   * only, which is the only format whose entries are worth underlining.
+   */
+  span?: TextSpan;
 }
 
 /**
@@ -33,6 +45,8 @@ export interface ParsedSolution {
   diagnostics: string[];
   /** Set by the `.slnf` parser only: the solution path it declares, relative to itself. */
   solutionRelativePath?: string;
+  /** Set by the `.slnf` parser only: where its `solution.path` value sits. */
+  solutionPathSpan?: TextSpan;
 }
 
 export interface FileReader {
