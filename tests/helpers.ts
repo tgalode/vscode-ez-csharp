@@ -19,7 +19,15 @@ export class StubFiles implements FileReader, ExistenceProbe {
   /** Declares a project file with the given `ProjectReference` targets and packages. */
   project(
     absolutePath: string,
-    options: { references?: string[]; packages?: string[]; isTestProject?: boolean } = {},
+    options: {
+      references?: string[];
+      packages?: string[];
+      isTestProject?: boolean;
+      /** `ItemGroup` blocks guarded by a `Condition` attribute. */
+      conditional?: { condition: string; references: string[] }[];
+      /** References carrying the `Condition` on the element itself. */
+      conditionalReferences?: { condition: string; include: string }[];
+    } = {},
   ): this {
     const references = (options.references ?? [])
       .map((reference) => `    <ProjectReference Include="${reference}" />`)
@@ -29,9 +37,25 @@ export class StubFiles implements FileReader, ExistenceProbe {
       .join('\n');
     const flag = options.isTestProject === true ? '    <IsTestProject>true</IsTestProject>\n' : '';
 
+    const conditionalGroups = (options.conditional ?? [])
+      .map(
+        (group) =>
+          `  <ItemGroup Condition="${group.condition}">\n${group.references
+            .map((reference) => `    <ProjectReference Include="${reference}" />`)
+            .join('\n')}\n  </ItemGroup>`,
+      )
+      .join('\n');
+
+    const inlineConditional = (options.conditionalReferences ?? [])
+      .map(
+        (entry) =>
+          `    <ProjectReference Include="${entry.include}" Condition="${entry.condition}" />`,
+      )
+      .join('\n');
+
     return this.set(
       absolutePath,
-      `<Project Sdk="Microsoft.NET.Sdk">\n  <PropertyGroup>\n${flag}  </PropertyGroup>\n  <ItemGroup>\n${packages}\n  </ItemGroup>\n  <ItemGroup>\n${references}\n  </ItemGroup>\n</Project>\n`,
+      `<Project Sdk="Microsoft.NET.Sdk">\n  <PropertyGroup>\n${flag}  </PropertyGroup>\n  <ItemGroup>\n${packages}\n  </ItemGroup>\n  <ItemGroup>\n${references}\n${inlineConditional}\n  </ItemGroup>\n${conditionalGroups}\n</Project>\n`,
     );
   }
 

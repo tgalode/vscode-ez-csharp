@@ -2,7 +2,7 @@
   "name": "solution-scope",
   "displayName": "Solution Scope",
   "description": "Work on a slice of a large .NET solution. Generate .slnf solution filters, switch between them, and scope the C# language server to the one you need.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "license": "MIT",
   "publisher": "tgalode",
   "engines": {
@@ -57,6 +57,11 @@
     "configuration": {
       "title": "Solution Scope",
       "properties": {
+        "solutionScope.configuration": {
+          "type": "string",
+          "default": "Debug",
+          "description": "MSBuild configuration used to resolve conditional ProjectReference entries. Set this when your projects wire dependencies differently per configuration."
+        },
         "solutionScope.includeTestProjects": {
           "type": "boolean",
           "default": true,

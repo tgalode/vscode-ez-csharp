@@ -26,13 +26,14 @@ export async function generateFilter(services: Services): Promise<void> {
   const plan = await vscode.window.withProgress(
     { location: vscode.ProgressLocation.Notification, title: 'Solution Scope: resolving references' },
     async () => {
-      const graph = new ProjectGraph(services.files);
+      const settings = vscode.workspace.getConfiguration('solutionScope');
+      const graph = new ProjectGraph(services.files, {
+        configuration: settings.get<string>('configuration', 'Debug'),
+      });
       const solutionDirectory = path.dirname(solution.solutionPath);
       const roots = selected.map((entry) => resolveFromDir(solutionDirectory, entry.relativePath));
       const result = await planFilter(solution, roots, graph, {
-        includeTestProjects: vscode.workspace
-          .getConfiguration('solutionScope')
-          .get<boolean>('includeTestProjects', true),
+        includeTestProjects: settings.get<boolean>('includeTestProjects', true),
       });
       services.log.diagnostics('Project graph', graph.diagnostics);
       return result;

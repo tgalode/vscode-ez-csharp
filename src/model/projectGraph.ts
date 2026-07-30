@@ -2,6 +2,7 @@ import * as path from 'node:path';
 import { XMLParser } from 'fast-xml-parser';
 import type { FileReader } from './types';
 import { projectNameFromPath, toPosix } from './paths';
+import { evaluateCondition, type PropertyValues } from './msbuildCondition';
 
 const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '@' });
 
@@ -21,15 +22,38 @@ const TEST_NAME_PATTERN = /(^|\.)(tests?|specs?|unittests?|integrationtests?)$/i
  * Every project file is read and parsed at most once: the reverse closure walks the
  * whole solution, and a monolith holds dozens of projects.
  */
+export interface ProjectGraphOptions {
+  /** MSBuild configuration the graph is resolved for. Governs conditional references. */
+  configuration?: string;
+}
+
 export class ProjectGraph {
   private readonly documents = new Map<string, unknown>();
   private readonly references = new Map<string, string[]>();
   private readonly closures = new Map<string, Set<string>>();
+  private readonly properties: PropertyValues;
   readonly diagnostics: string[] = [];
 
-  constructor(private readonly reader: FileReader) {}
+  constructor(
+    private readonly reader: FileReader,
+    options: ProjectGraphOptions = {},
+  ) {
+    this.properties = {
+      Configuration: options.configuration ?? 'Debug',
+      // Default of SDK-style projects, so the common `Configuration|Platform` form resolves.
+      Platform: 'AnyCPU',
+    };
+  }
 
-  /** Direct `ProjectReference` targets of a project, as absolute OS paths. */
+  /**
+   * Direct `ProjectReference` targets of a project, as absolute OS paths.
+   *
+   * References guarded by a `Condition` that does not hold for the current
+   * configuration are skipped. A repository can wire neighbouring source repositories
+   * through a dedicated configuration and consume them as NuGet packages otherwise;
+   * following those references unconditionally pulls in projects that do not apply and
+   * are often not even cloned.
+   */
   async referencesOf(projectAbsolutePath: string): Promise<string[]> {
     const cached = this.references.get(projectAbsolutePath);
     if (cached !== undefined) {
@@ -37,14 +61,17 @@ export class ProjectGraph {
     }
 
     const document = await this.documentOf(projectAbsolutePath);
-    const raw: string[] = [];
-    collectAttributes(document, 'ProjectReference', '@Include', raw);
+    const collected: CollectedReference[] = [];
+    collectProjectReferences(document, [], collected);
 
     const directory = path.dirname(projectAbsolutePath);
     const resolved: string[] = [];
 
-    for (const entry of raw) {
-      for (const part of entry.split(';')) {
+    for (const entry of collected) {
+      if (!this.applies(entry.conditions, projectAbsolutePath)) {
+        continue;
+      }
+      for (const part of entry.include.split(';')) {
         const value = part.trim();
         if (value === '') {
           continue;
@@ -61,6 +88,22 @@ export class ProjectGraph {
 
     this.references.set(projectAbsolutePath, resolved);
     return resolved;
+  }
+
+  /** False only when a condition definitely excludes the reference. */
+  private applies(conditions: readonly string[], projectAbsolutePath: string): boolean {
+    for (const condition of conditions) {
+      const verdict = evaluateCondition(condition, this.properties);
+      if (verdict === false) {
+        return false;
+      }
+      if (verdict === undefined) {
+        this.diagnostics.push(
+          `Condition "${condition.trim()}" in ${projectAbsolutePath} cannot be evaluated; the reference is kept.`,
+        );
+      }
+    }
+    return true;
   }
 
   /**
@@ -170,6 +213,61 @@ export class ProjectGraph {
 
     this.documents.set(projectAbsolutePath, document);
     return document;
+  }
+}
+
+interface CollectedReference {
+  include: string;
+  /** Conditions from every enclosing element, plus the reference's own, outermost first. */
+  conditions: string[];
+}
+
+/**
+ * Collects `ProjectReference` entries along with the `Condition` attributes they
+ * inherit from their ancestors, which is what an attribute-only walk loses.
+ */
+function collectProjectReferences(
+  node: unknown,
+  inherited: readonly string[],
+  out: CollectedReference[],
+): void {
+  if (Array.isArray(node)) {
+    for (const item of node) {
+      collectProjectReferences(item, inherited, out);
+    }
+    return;
+  }
+  if (typeof node !== 'object' || node === null) {
+    return;
+  }
+
+  const record = node as Record<string, unknown>;
+  const own =
+    typeof record['@Condition'] === 'string' ? [...inherited, record['@Condition']] : inherited;
+
+  for (const [key, value] of Object.entries(record)) {
+    if (key.startsWith('@')) {
+      continue;
+    }
+    if (key === 'ProjectReference') {
+      for (const entry of Array.isArray(value) ? value : [value]) {
+        if (typeof entry !== 'object' || entry === null) {
+          continue;
+        }
+        const reference = entry as Record<string, unknown>;
+        const include = reference['@Include'];
+        if (typeof include !== 'string') {
+          continue;
+        }
+        const conditions =
+          typeof reference['@Condition'] === 'string'
+            ? [...own, reference['@Condition']]
+            : [...own];
+        out.push({ include, conditions });
+      }
+      continue;
+    }
+    collectProjectReferences(value, own, out);
   }
 }
 

@@ -63,6 +63,91 @@ describe('ProjectGraph', () => {
     expect(dependents).toEqual([TESTS]);
   });
 
+  /*
+   * A repository can wire neighbouring source repositories through a dedicated
+   * configuration and consume them as NuGet packages otherwise. Following those
+   * references unconditionally pollutes a filter with projects that do not apply, and
+   * that are frequently not even cloned.
+   */
+  describe('MSBuild conditions', () => {
+    const CONDITIONAL = { condition: " '$(Configuration)' == 'DebugWithLibs' ", references: ['../Common/Common.csproj'] };
+
+    it('ignores an ItemGroup whose configuration does not match', async () => {
+      const files = new StubFiles()
+        .project(WEB, { references: ['../Core/Core.csproj'], conditional: [CONDITIONAL] })
+        .project(CORE)
+        .project(COMMON);
+
+      const graph = new ProjectGraph(files, { configuration: 'Debug' });
+
+      expect(await graph.referencesOf(WEB)).toEqual([CORE]);
+    });
+
+    it('follows the same ItemGroup when the configuration matches', async () => {
+      const files = new StubFiles()
+        .project(WEB, { references: ['../Core/Core.csproj'], conditional: [CONDITIONAL] })
+        .project(CORE)
+        .project(COMMON);
+
+      const graph = new ProjectGraph(files, { configuration: 'DebugWithLibs' });
+
+      expect((await graph.referencesOf(WEB)).sort()).toEqual([CORE, COMMON].sort());
+    });
+
+    it('compares configurations case-insensitively, as MSBuild does', async () => {
+      const files = new StubFiles()
+        .project(WEB, { conditional: [{ condition: " '$(Configuration)' == 'debug' ", references: ['../Core/Core.csproj'] }] })
+        .project(CORE);
+
+      expect(await new ProjectGraph(files, { configuration: 'Debug' }).referencesOf(WEB)).toEqual([CORE]);
+    });
+
+    it('honours an inequality', async () => {
+      const files = new StubFiles()
+        .project(WEB, { conditional: [{ condition: " '$(Configuration)' != 'Release' ", references: ['../Core/Core.csproj'] }] })
+        .project(CORE);
+
+      expect(await new ProjectGraph(files, { configuration: 'Release' }).referencesOf(WEB)).toEqual([]);
+      expect(await new ProjectGraph(files, { configuration: 'Debug' }).referencesOf(WEB)).toEqual([CORE]);
+    });
+
+    it('honours a Condition carried by the ProjectReference element itself', async () => {
+      const files = new StubFiles()
+        .project(WEB, {
+          conditionalReferences: [
+            { condition: " '$(Configuration)' == 'Release' ", include: '../Core/Core.csproj' },
+          ],
+        })
+        .project(CORE);
+
+      expect(await new ProjectGraph(files, { configuration: 'Debug' }).referencesOf(WEB)).toEqual([]);
+    });
+
+    it('handles the combined Configuration|Platform form', async () => {
+      const files = new StubFiles()
+        .project(WEB, {
+          conditional: [
+            { condition: " '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ", references: ['../Core/Core.csproj'] },
+          ],
+        })
+        .project(CORE);
+
+      expect(await new ProjectGraph(files, { configuration: 'Debug' }).referencesOf(WEB)).toEqual([CORE]);
+    });
+
+    /* Dropping a real dependency breaks the filter; keeping a spurious one is filtered
+     * out later by the intersection with the solution. Undecidable means keep. */
+    it('keeps a reference whose condition cannot be evaluated, and says so', async () => {
+      const files = new StubFiles()
+        .project(WEB, { conditional: [{ condition: "Exists('nope.props')", references: ['../Core/Core.csproj'] }] })
+        .project(CORE);
+      const graph = new ProjectGraph(files, { configuration: 'Debug' });
+
+      expect(await graph.referencesOf(WEB)).toEqual([CORE]);
+      expect(graph.diagnostics.some((entry) => entry.includes('Exists'))).toBe(true);
+    });
+  });
+
   it('recognizes a test project by its test platform package', async () => {
     const files = new StubFiles()
       .project(TESTS, { packages: ['NUnit', 'Microsoft.NET.Test.Sdk'] })

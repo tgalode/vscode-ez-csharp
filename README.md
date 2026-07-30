@@ -56,6 +56,7 @@ a language server to apply it to.
 
 | Setting | Default | Meaning |
 | --- | --- | --- |
+| `solutionScope.configuration` | `Debug` | MSBuild configuration used to resolve conditional references |
 | `solutionScope.includeTestProjects` | `true` | Add test projects that reference the selection |
 | `solutionScope.restartLanguageServerOnSwitch` | `true` | Restart the C# server after switching |
 | `solutionScope.statusBar.enabled` | `true` | Show the current scope in the status bar |
@@ -77,6 +78,22 @@ against the .NET SDK rather than assumed:
 
 Filters are written with backslash separators, matching what Visual Studio and Rider
 produce. The SDK accepts either separator on every platform.
+
+## Conditional references
+
+A `ProjectReference` guarded by an MSBuild `Condition` is only followed when the
+condition holds for `solutionScope.configuration`. This matters for repositories that
+wire neighbouring source repositories under a dedicated configuration and consume them
+as NuGet packages otherwise: following those references unconditionally pulls projects
+into every filter that do not apply, and are often not even cloned.
+
+The supported subset is a single `==` or `!=` comparison over properties, which is what
+guards project references in practice. `Configuration` and `Platform` are known;
+`Platform` defaults to `AnyCPU`, so the classic `'$(Configuration)|$(Platform)'` form
+resolves. Anything else, a property function such as `Exists(...)`, a boolean operator,
+or an unknown property, leaves the reference in place and is reported in the log.
+Dropping a real dependency produces a filter that does not load, so an undecidable
+condition means keep.
 
 Nothing is ever written to your `.sln` or `.slnx` files.
 
