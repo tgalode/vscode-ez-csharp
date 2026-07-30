@@ -13,3 +13,6 @@ vitest.config.ts
 **/*.map
 **/*.ts
 !dist/extension.js
+.vscode-test/**
+.vscode-test.mjs
+tsconfig.integration.json

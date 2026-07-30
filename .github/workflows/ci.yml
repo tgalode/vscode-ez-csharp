@@ -18,3 +18,20 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # The extension host is a real VS Code window, so it needs a display.
+      - run: xvfb-run -a npm run test:integration
+      # These two install ms-dotnettools.csharp from the Marketplace, which is what
+      # registers dotnet.defaultSolution and therefore the only way to observe what
+      # applying a scope actually writes.
+      - run: xvfb-run -a npm run test:integration:csharp
+      - run: xvfb-run -a npm run test:integration:multiroot
