@@ -65,6 +65,9 @@ export async function readSolution(
     solutionPath,
     projects: parsed.projects,
     diagnostics: parsed.diagnostics,
+    ...(parsed.solutionPathSpan === undefined
+      ? {}
+      : { solutionPathSpan: parsed.solutionPathSpan }),
   };
 }
 

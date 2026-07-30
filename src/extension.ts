@@ -9,6 +9,7 @@ import type { Services } from './services';
 import { switchScope } from './commands/switchScope';
 import { generateFilter } from './commands/generateFilter';
 import { applyScope } from './commands/applyScope';
+import { FilterDiagnostics } from './workspace/filterDiagnostics';
 
 export function activate(context: vscode.ExtensionContext): void {
   const log = new Log();
@@ -16,6 +17,7 @@ export function activate(context: vscode.ExtensionContext): void {
   const scope = new ScopeManager();
   const statusBar = new ScopeStatusBar();
   const files = new WorkspaceFileSystem();
+  const filterDiagnostics = new FilterDiagnostics(files);
 
   const services: Services = {
     discovery,
@@ -33,6 +35,7 @@ export function activate(context: vscode.ExtensionContext): void {
     log,
     discovery,
     statusBar,
+    filterDiagnostics,
     vscode.commands.registerCommand('solutionScope.switchScope', () => run(log, () => switchScope(services))),
     vscode.commands.registerCommand('solutionScope.generateFilter', () =>
       run(log, () => generateFilter(services)),

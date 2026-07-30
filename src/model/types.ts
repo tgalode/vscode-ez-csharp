@@ -37,6 +37,8 @@ export interface SolutionModel {
   projects: ProjectEntry[];
   /** Non-fatal problems found while parsing. Never thrown, always surfaced in the log. */
   diagnostics: string[];
+  /** Set for a `.slnf` only: where its `solution.path` value sits in the source. */
+  solutionPathSpan?: TextSpan;
 }
 
 /** What a format parser returns before paths are resolved against the file system. */
