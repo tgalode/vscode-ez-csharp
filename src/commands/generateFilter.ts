@@ -2,11 +2,10 @@ import * as path from 'node:path';
 import * as vscode from 'vscode';
 import type { Services } from '../services';
 import type { ProjectEntry, SolutionModel } from '../model/types';
-import { readSolution } from '../model/solutionReader';
 import { ProjectGraph } from '../model/projectGraph';
 import { planFilter } from '../filters/planner';
-import { buildFilterContent } from '../filters/generator';
 import { resolveFromDir } from '../model/paths';
+import { pickSolution, saveFilter } from './filterFlow';
 import { applyScope } from './applyScope';
 
 interface ProjectItem extends vscode.QuickPickItem {
@@ -43,30 +42,14 @@ export async function generateFilter(services: Services): Promise<void> {
 
   services.log.diagnostics('Filter plan', plan.diagnostics);
 
-  const targetUri = await askForTarget(solution, selected);
+  const targetUri = await saveFilter(services, {
+    solutionAbsolutePath: solution.solutionPath,
+    projectAbsolutePaths: plan.projects,
+    suggestedName: `${selected[0]?.name ?? 'scope'}.slnf`,
+  });
   if (targetUri === undefined) {
     return;
   }
-
-  if (await services.files.exists(targetUri.fsPath)) {
-    const overwrite = await vscode.window.showWarningMessage(
-      `${path.basename(targetUri.fsPath)} already exists. Overwrite it?`,
-      { modal: true },
-      'Overwrite',
-    );
-    if (overwrite !== 'Overwrite') {
-      return;
-    }
-  }
-
-  const content = buildFilterContent({
-    filterAbsolutePath: targetUri.fsPath,
-    solutionAbsolutePath: solution.solutionPath,
-    projectAbsolutePaths: plan.projects,
-  });
-
-  await services.files.writeFile(targetUri.fsPath, content);
-  await services.discovery.refresh();
 
   const summary =
     `${path.basename(targetUri.fsPath)}: ${plan.projects.length} project(s)` +
@@ -82,48 +65,6 @@ export async function generateFilter(services: Services): Promise<void> {
   } else if (choice === 'Open file') {
     await vscode.window.showTextDocument(targetUri);
   }
-}
-
-async function pickSolution(services: Services): Promise<SolutionModel | undefined> {
-  const { discovery, files, log } = services;
-
-  if (discovery.solutions.length === 0) {
-    await discovery.refresh();
-  }
-
-  const candidates = discovery.solutions;
-  if (candidates.length === 0) {
-    void vscode.window.showInformationMessage(
-      'ezsharp: no .sln or .slnx file found to build a filter from.',
-    );
-    return undefined;
-  }
-
-  let chosen = candidates[0]!;
-  if (candidates.length > 1) {
-    const picked = await vscode.window.showQuickPick(
-      candidates.map((file) => ({ label: file.label, description: file.format, file })),
-      { title: 'ezsharp', placeHolder: 'Which solution should the filter apply to?' },
-    );
-    if (picked === undefined) {
-      return undefined;
-    }
-    chosen = picked.file;
-  }
-
-  const model = await readSolution(chosen.uri.fsPath, files);
-  if (model === undefined || model.projects.length === 0) {
-    void vscode.window.showErrorMessage(
-      `ezsharp: no project found in ${chosen.label}. See the log for details.`,
-    );
-    if (model !== undefined) {
-      log.diagnostics(model.filePath, model.diagnostics);
-    }
-    return undefined;
-  }
-
-  log.diagnostics(model.filePath, model.diagnostics);
-  return model;
 }
 
 async function pickProjects(solution: SolutionModel): Promise<ProjectEntry[] | undefined> {
@@ -144,37 +85,4 @@ async function pickProjects(solution: SolutionModel): Promise<ProjectEntry[] | u
   });
 
   return picked?.map((item) => item.entry);
-}
-
-/** Filters live next to their solution, which is where every other tool looks for them. */
-async function askForTarget(
-  solution: SolutionModel,
-  selected: readonly ProjectEntry[],
-): Promise<vscode.Uri | undefined> {
-  const suggestion = `${selected[0]?.name ?? 'scope'}.slnf`;
-
-  const name = await vscode.window.showInputBox({
-    title: 'ezsharp',
-    prompt: `Filter file name, saved next to ${path.basename(solution.solutionPath)}`,
-    value: suggestion,
-    validateInput: (value) => {
-      const trimmed = value.trim();
-      if (trimmed === '') {
-        return 'A file name is required.';
-      }
-      if (!trimmed.toLowerCase().endsWith('.slnf')) {
-        return 'The name must end with .slnf';
-      }
-      if (/[\\/]/.test(trimmed)) {
-        return 'Use a file name without a directory.';
-      }
-      return undefined;
-    },
-  });
-
-  if (name === undefined) {
-    return undefined;
-  }
-
-  return vscode.Uri.file(path.join(path.dirname(solution.solutionPath), name.trim()));
 }
