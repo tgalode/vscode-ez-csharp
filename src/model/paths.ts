@@ -30,3 +30,21 @@ export function projectNameFromPath(relativePath: string): string {
   const dot = base.lastIndexOf('.');
   return dot > 0 ? base.slice(0, dot) : base;
 }
+
+/**
+ * Comparison key for an absolute path.
+ *
+ * A solution and a project file routinely disagree on the casing of a shared directory
+ * while still naming the same file on macOS and Windows. Treating them as distinct would
+ * silently drop a dependency.
+ */
+export function pathKey(absolutePath: string): string {
+  return absolutePath.toLowerCase();
+}
+
+/** Stable order over absolute paths, case-insensitive. */
+export function comparePaths(left: string, right: string): number {
+  const a = pathKey(left);
+  const b = pathKey(right);
+  return a < b ? -1 : a > b ? 1 : 0;
+}
