@@ -40,6 +40,12 @@ the Problems panel, underlined on the entry that causes them, rather than in a l
 have to think of opening. The text in the editor is what gets checked, so a fix clears the
 squiggle before you save.
 
+**Compose a slice.** The `ezsharp` view in the activity bar lists the whole solution. Tick
+the projects you want and it shows what they entail, dependency by dependency, with a count
+in the view badge. A ticked project means you want it; a project listed underneath is there
+because something you ticked needs it. Save the result as a `.slnf`, or apply it straight
+away.
+
 ## Requirements
 
 The [C# extension](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csharp)
@@ -56,6 +62,11 @@ a language server to apply it to.
 | `ezsharp: Clear Scope` | Unpin, letting the C# extension choose again |
 | `ezsharp: Refresh Discovery` | Re-scan the workspace |
 | `ezsharp: Show Log` | Open the output channel with parse diagnostics |
+| `ezsharp: Select Solution` | Choose the solution the view composes from |
+| `ezsharp: Save Slice as .slnf` | Write the composed slice next to its solution |
+| `ezsharp: Apply Slice` | Write it, then scope the language server to it |
+| `ezsharp: Reset Slice` | Clear the ticked projects |
+| `ezsharp: Refresh Slice` | Re-read the project files after they changed on disk |
 
 ## Settings
 

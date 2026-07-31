@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.5.0
+
+- A `Slice` view in the activity bar composes a filter by ticking projects, showing what the
+  selection entails and a count that follows every tick. Until now the selection happened in
+  a transient quick pick that said nothing about the consequences: on a real solution, one
+  application drags in ten more projects.
+- The checkbox means "I want this project", not "this is in the slice". A project pulled in
+  by a dependency shows unticked, with the chosen root that brings it. Ticking it has a real
+  effect, since only chosen projects pull in the tests covering them.
+- The view starts empty on purpose. A `.slnf` records members, never the intent that
+  produced them, so seeding from a pinned filter would declare every member chosen and drag
+  in every covering test.
+- `Generate Solution Filter` and the view share one name prompt and one write path.
+
 ## 0.4.0
 
 Renamed to `ezsharp`, before the first publication rather than after, since an extension

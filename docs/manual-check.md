@@ -45,6 +45,15 @@ This is the product's only promise, and no test asserts it.
 - [ ] Open a `.slnf` naming a project the solution does not contain. The entry is
       underlined, the Problems panel holds one error mentioning `MSB5028`, and fixing the
       line clears it without saving.
+- [ ] The `ezsharp` icon appears in the activity bar and opens the `Slice` view.
+- [ ] Ticking a project adds its dependencies underneath, each showing which chosen project
+      brings it, and the view badge counts up.
+- [ ] Unticking it empties the slice again.
+- [ ] A project pulled in by a dependency shows unticked. Ticking it adds the tests that
+      cover it.
+- [ ] Solution folders appear as folders, nested ones included, and every project of the
+      solution is listed whether or not it is in the slice.
+- [ ] On a solution of several dozen projects, ticking feels immediate.
 
 ## Restarting for real
 
