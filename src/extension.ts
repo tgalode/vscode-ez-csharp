@@ -10,6 +10,7 @@ import { switchScope } from './commands/switchScope';
 import { generateFilter } from './commands/generateFilter';
 import { applyScope } from './commands/applyScope';
 import { FilterDiagnostics } from './workspace/filterDiagnostics';
+import { SliceView } from './views/sliceView';
 
 export function activate(context: vscode.ExtensionContext): void {
   const log = new Log();
@@ -31,11 +32,30 @@ export function activate(context: vscode.ExtensionContext): void {
     },
   };
 
+  const sliceView = new SliceView(services);
+
   context.subscriptions.push(
     log,
     discovery,
     statusBar,
     filterDiagnostics,
+    sliceView,
+    vscode.commands.registerCommand('ezsharp.slice.save', () => run(log, () => sliceView.save())),
+    vscode.commands.registerCommand('ezsharp.slice.apply', () => run(log, () => sliceView.apply())),
+    vscode.commands.registerCommand('ezsharp.slice.reset', () => run(log, () => sliceView.reset())),
+    vscode.commands.registerCommand('ezsharp.slice.refresh', () =>
+      run(log, () => sliceView.refresh()),
+    ),
+    vscode.commands.registerCommand('ezsharp.slice.selectSolution', () =>
+      run(log, () => sliceView.selectSolution()),
+    ),
+    vscode.commands.registerCommand('ezsharp.slice.toggleProject', (absolutePath: unknown) =>
+      run(log, () =>
+        typeof absolutePath === 'string'
+          ? sliceView.toggleProject(absolutePath)
+          : Promise.resolve(),
+      ),
+    ),
     vscode.commands.registerCommand('ezsharp.switchScope', () => run(log, () => switchScope(services))),
     vscode.commands.registerCommand('ezsharp.generateFilter', () =>
       run(log, () => generateFilter(services)),

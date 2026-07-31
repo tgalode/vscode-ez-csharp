@@ -23,7 +23,8 @@
   "activationEvents": [
     "workspaceContains:**/*.sln",
     "workspaceContains:**/*.slnx",
-    "workspaceContains:**/*.slnf"
+    "workspaceContains:**/*.slnf",
+    "onView:ezsharp.slice"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -52,8 +53,95 @@
         "command": "ezsharp.showLog",
         "title": "Show Log",
         "category": "ezsharp"
+      },
+      {
+        "command": "ezsharp.slice.save",
+        "title": "Save Slice as .slnf",
+        "category": "ezsharp",
+        "icon": "$(save)"
+      },
+      {
+        "command": "ezsharp.slice.apply",
+        "title": "Apply Slice",
+        "category": "ezsharp",
+        "icon": "$(check)"
+      },
+      {
+        "command": "ezsharp.slice.reset",
+        "title": "Reset Slice",
+        "category": "ezsharp",
+        "icon": "$(clear-all)"
+      },
+      {
+        "command": "ezsharp.slice.refresh",
+        "title": "Refresh Slice",
+        "category": "ezsharp",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "ezsharp.slice.selectSolution",
+        "title": "Select Solution",
+        "category": "ezsharp",
+        "icon": "$(list-selection)"
+      },
+      {
+        "command": "ezsharp.slice.toggleProject",
+        "title": "Toggle Project in Slice",
+        "category": "ezsharp"
       }
     ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "ezsharp",
+          "title": "ezsharp",
+          "icon": "media/ezsharp.svg"
+        }
+      ]
+    },
+    "views": {
+      "ezsharp": [
+        {
+          "id": "ezsharp.slice",
+          "name": "Slice"
+        }
+      ]
+    },
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "ezsharp.slice.toggleProject",
+          "when": "false"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "ezsharp.slice.selectSolution",
+          "when": "view == ezsharp.slice",
+          "group": "navigation@1"
+        },
+        {
+          "command": "ezsharp.slice.save",
+          "when": "view == ezsharp.slice",
+          "group": "navigation@2"
+        },
+        {
+          "command": "ezsharp.slice.apply",
+          "when": "view == ezsharp.slice",
+          "group": "navigation@3"
+        },
+        {
+          "command": "ezsharp.slice.refresh",
+          "when": "view == ezsharp.slice",
+          "group": "navigation@4"
+        },
+        {
+          "command": "ezsharp.slice.reset",
+          "when": "view == ezsharp.slice",
+          "group": "navigation@5"
+        }
+      ]
+    },
     "configuration": {
       "title": "ezsharp",
       "properties": {
